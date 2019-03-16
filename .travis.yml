@@ -19,6 +19,6 @@ deploy:
   provider: releases
   api_key:
     secure: N1bmvbsO170ne1wnYqVLfunhEmsmGiHogtocBVEJ6ZR4JmtKXg9QB3VcZmoHJgd4CgQaESL3HuzebPslB1AXuivAtlnbmMwkSfo5yyHQjK15Yym0ZwCERgL1SuCxYehJF9LqkPOgmzdugEvHI5qbBI8lmGOBHi1zOxnOBky1Qs7PUPLOw3rFrAPRXbQ/MM3Er/tky4zZC+zT6twjt6Lhc9akeA8s6PFLj30D9RWgrPDhN4WDBqPAs/ctXlFtQ94c7uNE7TbAhq1c9chJNx4wb5X1QEt8XMsy4l0zZAGgWC8RxJUaOZ43c68Marof9E7tY62Pc1JW1DRS+Rw5UB31mo8Hb/gPxWQj0Lcy9SsqdlmxLxSdTdwSNqF2c8Nb/x0TXPeFi7ccmndhZtF1Hhovb/198H9WU9wZ4j9gfNp5jGMUqI5d5x/qNMA/6LjGOeENLif6vrMpe0QJa/jxLUuq2m0YiUyUjtTvkv9wFEV1cJFy7ziXIxAzIgY2L59aZKxCDLIQmNnWOjGip4aguOhRJiNxI3oXjlLx/61zIKx/tbccoRE9PM8Px3HLA5KI2t4AuuhCUCBPo9HK0fqy+y0qVbUrWcWN9owCu/APlS40b7QCjU5rtsITnt1+LQ/Lj0VGSx8yS1x/4HLJePSfOsjaA/pnc8KL+7c6RRSZRelNhMQ=
-  file: ".pioenvs/edu/firmware.hex"
+  file: ".pioenvs/board/firmware.hex"
   on:
     repo: bastlirna/esp8266-board-app
