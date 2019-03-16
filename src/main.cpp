@@ -32,6 +32,9 @@ void setup() {
     Serial.println("");
     Serial.println("");
 
+    Serial.print("Project version: ");
+    Serial.println(BUILD_VERSION);
+
     conf.init();
     conf.print();
 
