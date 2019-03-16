@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
+#include <ESP8266httpUpdate.h>
 
 #include "mqtt.h"
 #include "settings.h"
@@ -25,9 +26,83 @@ void MQTT::calc_global_topic(char *topic, char *out)
     sprintf(out, "AD19/master/%s", topic);
 }
 
+void MQTT::checkUpdate()
+{
+    if (latestFw != 0 && strlen(latestFw) > 0 && strcmp(latestFw, BUILD_VERSION) != 0) {
+        Serial.println("Firmware is not actual.");
+
+        if (fwUrl != 0 && strlen(fwUrl) > 0 && strncmp(fwUrl, "https", 5) == 0) {
+            Serial.print("Downloading new FW from ");
+            Serial.println(fwUrl);
+
+            update();
+        }
+    }
+}
+
+void MQTT::update()
+{
+    WiFiClientSecure client;
+
+    if (fwUrl == 0) {
+        return;
+    }
+
+    Serial.print("Flash started ... ");
+    t_httpUpdate_return ret = ESPhttpUpdate.update(client, fwUrl);
+    
+    if (ret != HTTP_UPDATE_OK) {
+        Serial.println("failed");
+        return;
+    }
+    
+    Serial.println("done");
+}
+
+void MQTT::setLatestFw(char* fw) 
+{
+    if(latestFw != 0) {
+        free(latestFw);
+    }
+
+    latestFw = (char*) malloc(strlen(fw) + 1);
+    strcpy(latestFw, fw);
+    Serial.print("Set latest FW version to ");
+    Serial.println(latestFw);
+
+    checkUpdate();
+}
+
+void MQTT::setFwUrl(char* url) 
+{
+    if(fwUrl != 0) {
+        free(fwUrl);
+    }
+
+    fwUrl = (char*) malloc(strlen(url) + 1);
+    strcpy(fwUrl, url);
+    Serial.print("Set FW update url to ");
+    Serial.println(fwUrl);
+    
+    checkUpdate();
+}
+
+static void cb_last_fw(char *data, void *attr) 
+{
+    MQTT *mqtt = (MQTT*)attr;
+    mqtt->setLatestFw(data);
+}
+
+static void cb_fw_url(char *data, void *attr) 
+{
+    MQTT *mqtt = (MQTT*)attr;
+    mqtt->setFwUrl(data);
+}
+
 void MQTT::init()
 {
-
+    subscribe("$fw/last", cb_last_fw, this, true);
+    subscribe("$fw/url", cb_fw_url, this, true);
 }
 
 void MQTT::publish(char *topic, char *message)
@@ -37,6 +112,11 @@ void MQTT::publish(char *topic, char *message)
 
 void MQTT::publish(char *topic, char *message, bool retain)
 {
+    if (!client->connected())
+    {
+        return;
+    }
+
     char fullTopic[64];
     calc_topic(topic, fullTopic);
 
@@ -91,14 +171,21 @@ void MQTT::callback(char* topic, byte* payload, unsigned int length)
         } else {
             calc_topic(st->name, tmp);
         }
-
-        if (strncmp(tmp, topic, length) == 0) {
-
+       
+        if (strcmp(tmp, topic) == 0) {
+       
             if (length > MQTT_PAYLOAD_MAX_LENGTH) {
                 length = MQTT_PAYLOAD_MAX_LENGTH;
             }
             memcpy(ptext, payload, length);
             ptext[length] = 0;
+
+            Serial.print("Recieved message on [");
+            Serial.print(topic);
+            Serial.print("] with data '");
+            Serial.print(ptext);
+            Serial.println("'");
+            
             (st->cb) (ptext, st->attr);
             return;
         }

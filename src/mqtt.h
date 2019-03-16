@@ -37,15 +37,23 @@ class MQTT {
     void subscribe(char *topic, void (*cb) (char*, void *attr), void *attr, bool global);
     void subscribe(char *topic, void (*cb) (char*, void *attr), void *attr);
 
+    void setLatestFw(char *fw);
+    void setFwUrl(char *url);
+    void checkUpdate();
+
     private:
     void client_id(char *out);
     void sendSubscribe();
     void calc_topic(char *topic, char *out);
     void calc_global_topic(char *topic, char *out);
+    void update();
 
     PubSubClient *client;
     MQTTSubscribedTopics *subscribedTopics;
     uint32_t lastLoopRun;
+
+    char *latestFw = 0;
+    char *fwUrl = 0;
 
 };
 
